@@ -1,18 +1,71 @@
 pipeline{
   agent any
+  environment {
+    registryBrue = "sumitmann/devops_capstone_blue"
+    registryGreen = "sumitmann/devops_capstone_green"
+    registryCredential = 'dockerhub'
+    dockertag = getDockerTag()
+  }
   stages{
     stage('Lint HTML'){
-			steps{
-        sh 'tidy -q -e Blue/index.html'
-        sh 'tidy -q -e Green/index.html'
+      steps{
+            sh 'tidy -q -e Blue/index.html'
+            sh 'tidy -q -e Green/index.html'
       }
-		}
-     stage('Upload to AWS'){
-        steps{
-          withAWS(region:'eu-west-1',credentials:'udacity-capstone'){
-            s3Upload(file:'Blue/index.html', bucket:'my-udacity-capstone-project-bucket', path:'index.html')
+    }
+    stage("Lint Dockerfile"){
+      agent{
+          docker{
+              image 'hadolint/hadolint:latest-debian'
           }
         }
-     }
-  }
+      steps {
+          sh 'hadolint /Blue/Dockerfile.blue | tee -a hadolint_lint.txt'
+          sh '''
+              lintErrors=$(stat --printf="%s"  hadolint_lint.txt)
+              if [ "$lintErrors" -gt "0" ]; then
+                  echo "Check Error"
+                  cat hadolint_lint.txt
+                  exit 1
+              else
+                  echo "No Error"
+              fi
+          '''
+          sh 'hadolint /Green/Dockerfile.green | tee -a hadolint_lint.txt'
+          sh '''
+              lintErrors=$(stat --printf="%s"  hadolint_lint.txt)
+              if [ "$lintErrors" -gt "0" ]; then
+                  echo "Check Error"
+                  cat hadolint_lint.txt
+                  exit 1
+              else
+                  echo "No Error"
+              fi
+          '''
+          }
+        }
+    stage('Build Docker Image'){
+      steps{
+        sh "docker build -f Blue/Dockerfile.blue Blue -t ${registry_blue}:${docker_tag}"
+        sh "docker build -f Green/Dockerfile.green Green -t ${registry_green}:${docker_tag}"
+      }
+    }
+    stage('Push Docker Image'){
+      steps{
+        script{
+          docker.withRegistry('', registryCredential) {
+            sh "docker push ${registry_blue}:${docker_tag}"
+            sh "echo docker tag ${registry_blue}:${docker_tag} ${registry_blue}:latest"
+            sh "docker push ${registry_green}:${docker_tag}"
+          }
+        }
+      }
+    }
+  }    
+}
+
+
+def getDockerTag() {  
+  def tag = sh script: 'git rev-parse --short=7 HEAD', returnStdout: true
+  return tag
 }
