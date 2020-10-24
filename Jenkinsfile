@@ -10,7 +10,7 @@ pipeline{
      stage('Upload to AWS'){
         steps{
           withAWS(region:'eu-west-1',credentials:'udacity-capstone'){
-            s3Upload(file:'index.html', bucket:'my-udacity-capstone-project-bucket', path:'index.html')
+            s3Upload(file:'Blue/index.html', bucket:'my-udacity-capstone-project-bucket', path:'index.html')
           }
         }
      }
