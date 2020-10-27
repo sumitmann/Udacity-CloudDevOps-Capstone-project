@@ -68,36 +68,62 @@ pipeline{
     //     }
     //   }
     // }
-    stage('Create cluster') {
-			steps {
-				withAWS(region:'eu-west-1', credentials:'udacity-capstone') {
-					sh '''
-						eksctl create cluster \
-						--name capstonecluster \
-						--version 1.16 \
-						--nodegroup-name standard-workers \
-						--node-type t2.micro \
-						--nodes 2 \
-						--nodes-min 1 \
-						--nodes-max 3 \
-						--node-ami auto \
-						--region eu-west-1 \
-						--zones eu-west-1a \
-						--zones eu-west-1b \
-						--zones eu-west-1c \
-					'''
-				}
-			}
-		}
-    stage('Create conf file cluster') {
-			steps {
-				withAWS(region:'eu-west-1', credentials:'udacity-capstone') {
-					sh '''
-						aws eks --region us-west-2 update-kubeconfig --name capstonecluster
-					'''
-				}
-			}
-		}
+    // stage('Create cluster') {
+		// 	steps {
+		// 		withAWS(region:'eu-west-1', credentials:'udacity-capstone') {
+		// 			sh '''
+		// 				eksctl create cluster \
+		// 				--name capstonecluster \
+		// 				--version 1.17 \
+		// 				--nodegroup-name standard-workers \
+		// 				--node-type t2.micro \
+		// 				--nodes 2 \
+		// 				--nodes-min 1 \
+		// 				--nodes-max 3 \
+		// 				--node-ami auto \
+		// 				--region eu-west-1 \
+		// 				--zones eu-west-1a \
+		// 				--zones eu-west-1b \
+		// 				--zones eu-west-1c \
+		// 			'''
+		// 		}
+		// 	}
+		// }
+    // stage('Create conf file cluster') {
+		// 	steps {
+		// 		withAWS(region:'eu-west-1', credentials:'udacity-capstone') {
+		// 			sh '''
+		// 				aws eks --region eu-west-1 update-kubeconfig --name capstonecluster
+		// 			'''
+		// 		}
+		// 	}
+		// }
+    stage('Deployment-Blue') {
+      when {
+          branch 'blue'
+      }
+      steps {
+          withAWS(credentials: 'udacity-capstone', region: 'eu-west-1') {
+              sh "aws eks --region eu-west-1 update-kubeconfig --name capstonecluster"
+              sh 'kubectl apply -f ./blue-controller.yaml'
+              sh 'kubectl apply -f ./service-controller-blue.yaml'
+              sh 'kubectl get services blue'
+          }
+      }
+    }
+    stage('Deployment-Green') {
+      when {
+          branch 'green'
+      }
+      steps {
+          withAWS(credentials: 'udacity-capstone', region: 'eu-west-1') {
+              sh "aws eks --region eu-west-1 update-kubeconfig --name capstonecluster"
+              sh 'kubectl apply -f ./green-controller.yaml'
+              sh 'kubectl apply -f ./service-controller-blue.yaml'
+              sh 'kubectl get services green'
+          }
+      }
+    }
   } 
 }
 
