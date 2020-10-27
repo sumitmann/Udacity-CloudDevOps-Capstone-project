@@ -41,7 +41,7 @@
     "ControlPlane": {
       "Type": "AWS::EKS::Cluster",
       "Properties": {
-        "Name": "capstonecluster",
+        "Name": "capstone-cluster-eks",
         "ResourcesVpcConfig": {
           "SecurityGroupIds": [
             {
@@ -75,7 +75,7 @@
             "Arn"
           ]
         },
-        "Version": "1.16"
+        "Version": "1.17"
       }
     },
     "ControlPlaneSecurityGroup": {
