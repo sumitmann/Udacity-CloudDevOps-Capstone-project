@@ -4,7 +4,7 @@ pipeline{
     registryBlue = "sumitmann/devops_capstone_blue"
     registryGreen = "sumitmann/devops_capstone_green"
     registryCredential = 'dockercredentials'
-    dockerTag = getDockerTag()
+    dockerTag = getdockerTag()
   }
   stages{
     stage('Lint HTML'){
@@ -55,24 +55,37 @@ pipeline{
         script{
           docker.withRegistry('', registryCredential) {
             sh "docker push ${registryBlue}:${dockerTag}"
-            sh "docker tag ${registryBlue}:${dockerTag} ${registryBlue}:latest"
+            sh '''
+                docker tag ${registryBlue}:${dockerTag} ${registryBlue}:latest
+            '''
             sh "docker push ${registryBlue}:latest"
             sh "docker push ${registryGreen}:${dockerTag}"
-            sh "docker tag ${registryGreen}:${dockerTag} ${registryGreen}:latest"
+            sh '''
+                docker tag ${registryGreen}:${dockerTag} ${registryGreen}:latest
+            '''
             sh "docker push ${registryGreen}:latest"
           }
         }
       }
     }
-    stage('Deploy to k8s'){
+    stage('Create EKS Node Stack'){
       steps{
-        sh "chmod +x changeTag.sh"
-        sh "./changeTag.sh ${dockertag}"
+        dir('Infra'){
+          withAWS(credentials: 'udacity-capstone', region: 'eu-west-1'){
+            sh './create.sh udacity-capstoneNodes udacity-capstoneNodes.yml'
+          }
+        }
+      }
+    }
+    stage('Update Kubeconfig'){
+      steps{
+        withAWS(credentials: 'udacity-capstone', region: 'eu-west-1') {
+          sh 'aws eks --region eu-west-1 update-kubeconfig --name udacity-capstoneNodes'
+        }
       }
     }
   } 
 }
-
 
 def getdockerTag() {  
   def tag = sh script: 'git rev-parse --short=7 HEAD', returnStdout: true
