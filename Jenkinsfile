@@ -3,8 +3,8 @@ pipeline{
   environment {
     registryBlue = "sumitmann/devops_capstone_blue"
     registryGreen = "sumitmann/devops_capstone_green"
-    registryCredential = 'dockerhub'
-    dockertag = getDockerTag()
+    registryCredential = 'dockercredentials'
+    dockerTag = getDockerTag()
   }
   stages{
     stage('Lint HTML'){
@@ -46,17 +46,17 @@ pipeline{
         }
     stage('Build Docker Image'){
       steps{
-        sh "docker build -f Blue/Dockerfile.blue Blue -t ${registry_blue}:${docker_tag}"
-        sh "docker build -f Green/Dockerfile.green Green -t ${registry_green}:${docker_tag}"
+        sh "docker build -f Blue/Dockerfile.blue Blue -t ${registryBlue}:${dockerTag}"
+        sh "docker build -f Green/Dockerfile.green Green -t ${registryGreen}:${dockerTag}"
       }
     }
     stage('Push Docker Image'){
       steps{
         script{
           docker.withRegistry('', registryCredential) {
-            sh "docker push ${registry_blue}:${docker_tag}"
-            sh "echo docker tag ${registry_blue}:${docker_tag} ${registry_blue}:latest"
-            sh "docker push ${registry_green}:${docker_tag}"
+            sh "docker push ${registryBlue}:${dockerTag}"
+            sh "echo docker tag ${registryBlue}:${dockerTag}"
+            sh "docker push ${registryGreen}:${dockerTag}"
           }
         }
       }
