@@ -64,11 +64,17 @@ pipeline{
         }
       }
     }
-  }    
+    stage('Deploy to k8s'){
+      steps{
+        sh "chmod +x changeTag.sh"
+        sh "./changeTag.sh ${dockertag}"
+      }
+    }
+  } 
 }
 
 
-def getDockerTag() {  
+def getdockerTag() {  
   def tag = sh script: 'git rev-parse --short=7 HEAD', returnStdout: true
-  return tag
+  return tag.trim()
 }
