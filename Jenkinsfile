@@ -72,8 +72,7 @@ pipeline{
 			steps {
 				withAWS(region:'eu-west-1', credentials:'udacity-capstone') {
 					sh '''
-						export KUBECONFIG=/home/jenkins/.kube/config
-						kubectl config use-context arn:aws:eks:eu-west-1:333791965355:cluster/capstone-cluster-eks
+						aws eks --region eu-west-1 update-kubeconfig --name capstone-cluster-eks
 					'''
 				}
 			}
