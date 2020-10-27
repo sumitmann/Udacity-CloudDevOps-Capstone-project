@@ -99,27 +99,22 @@ pipeline{
 		// 	}
 		// }
     stage('Deployment-Blue') {
-      when {
-          branch 'blue'
-      }
       steps {
           withAWS(credentials: 'udacity-capstone', region: 'eu-west-1') {
-              sh "aws eks --region eu-west-1 update-kubeconfig --name capstonecluster"
-              sh 'kubectl apply -f ./blue-controller.yaml'
-              sh 'kubectl apply -f ./service-controller-blue.yaml'
+              sh 'kubectl apply -f blue-controller.yaml'
+              sh 'kubectl apply -f service-controller-blue.yaml'
               sh 'kubectl get services blue'
           }
       }
     }
     stage('Deployment-Green') {
       when {
-          branch 'green'
+          branch 'Deployment-Blue'
       }
       steps {
           withAWS(credentials: 'udacity-capstone', region: 'eu-west-1') {
-              sh "aws eks --region eu-west-1 update-kubeconfig --name capstonecluster"
-              sh 'kubectl apply -f ./green-controller.yaml'
-              sh 'kubectl apply -f ./service-controller-blue.yaml'
+              sh 'kubectl apply -f green-controller.yaml'
+              sh 'kubectl apply -f service-controller-blue.yaml'
               sh 'kubectl get services green'
           }
       }
