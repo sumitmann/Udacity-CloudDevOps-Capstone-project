@@ -31,7 +31,8 @@
  10.  Redirect to green
 
  ### URLS
- 1. https://hub.docker.com/repository/docker/sumitmann/devops_capstone_blue
- 2. https://hub.docker.com/repository/docker/sumitmann/devops_capstone_green
- 3. http://a548542a948c34c93a5f1d939dfdb8a3-383808979.eu-west-1.elb.amazonaws.com:8000/
+ 1. BLUE-IMAGE: https://hub.docker.com/repository/docker/sumitmann/devops_capstone_blue
+ 2. GREEN-IMGAGE: https://hub.docker.com/repository/docker/sumitmann/devops_capstone_green
+ 3. DEPLOYMENT: http://a548542a948c34c93a5f1d939dfdb8a3-383808979.eu-west-1.elb.amazonaws.com:8000/
+ 4. JENKINS: http://ec2-63-33-199-61.eu-west-1.compute.amazonaws.com:8080/
 
