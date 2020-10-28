@@ -44,13 +44,13 @@ pipeline{
         '''
       }
     }
-    stage('Build Docker Image'){
+    stage('Build Docker Images'){
       steps{
         sh "docker build -f Blue/Dockerfile.blue Blue -t ${registryBlue}:${dockerTag}"
         sh "docker build -f Green/Dockerfile.green Green -t ${registryGreen}:${dockerTag}"
       }
     }
-    stage('Push Docker Image'){
+    stage('Push Docker Images'){
       steps{
         script{
           docker.withRegistry('', registryCredential) {
@@ -78,7 +78,7 @@ pipeline{
 				}
 			}
 		}
-    stage('Blue Deploy') {
+    stage('Blue Deployment') {
 			steps {
 				withAWS(region:'eu-west-1', credentials:'udacity-capstone') {
 					sh '''
@@ -87,7 +87,7 @@ pipeline{
 				}
 			}
 		}
-		stage('Green Deploy') {
+		stage('Green Deployment') {
 			steps {
 				withAWS(region:'eu-west-1', credentials:'udacity-capstone') {
 					sh '''
@@ -109,7 +109,7 @@ pipeline{
 				}
 			}
 		}
-    stage('Wait user approve') {
+    stage('Wait for user approval') {
       steps {
           input "Redirect the traffic to the green service?"
       }

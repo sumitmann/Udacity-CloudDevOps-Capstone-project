@@ -41,7 +41,7 @@
     "ControlPlane": {
       "Type": "AWS::EKS::Cluster",
       "Properties": {
-        "Name": "capstone-cluster-eks",
+        "Name": "udacity-capstone",
         "ResourcesVpcConfig": {
           "SecurityGroupIds": [
             {

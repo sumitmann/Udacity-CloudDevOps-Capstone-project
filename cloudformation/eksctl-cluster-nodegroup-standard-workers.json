@@ -24,13 +24,13 @@
     "EgressInterCluster": {
       "Type": "AWS::EC2::SecurityGroupEgress",
       "Properties": {
-        "Description": "Allow control plane to communicate with worker nodes in group capstone-workers-eks (kubelet and workload TCP ports)",
+        "Description": "Allow control plane to communicate with worker nodes in group udacity-capstone-nodes (kubelet and workload TCP ports)",
         "DestinationSecurityGroupId": {
           "Ref": "SG"
         },
         "FromPort": 1025,
         "GroupId": {
-          "Fn::ImportValue": "eksctl-capstone-cluster-eks-cluster::SecurityGroup"
+          "Fn::ImportValue": "eksctl-udacity-capstone-cluster::SecurityGroup"
         },
         "IpProtocol": "tcp",
         "ToPort": 65535
@@ -39,13 +39,13 @@
     "EgressInterClusterAPI": {
       "Type": "AWS::EC2::SecurityGroupEgress",
       "Properties": {
-        "Description": "Allow control plane to communicate with worker nodes in group capstone-workers-eks (workloads using HTTPS port, commonly used with extension API servers)",
+        "Description": "Allow control plane to communicate with worker nodes in group udacity-capstone-nodes (workloads using HTTPS port, commonly used with extension API servers)",
         "DestinationSecurityGroupId": {
           "Ref": "SG"
         },
         "FromPort": 443,
         "GroupId": {
-          "Fn::ImportValue": "eksctl-capstone-cluster-eks-cluster::SecurityGroup"
+          "Fn::ImportValue": "eksctl-udacity-capstone-cluster::SecurityGroup"
         },
         "IpProtocol": "tcp",
         "ToPort": 443
@@ -54,14 +54,14 @@
     "IngressInterCluster": {
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
-        "Description": "Allow worker nodes in group capstone-workers-eks to communicate with control plane (kubelet and workload TCP ports)",
+        "Description": "Allow worker nodes in group udacity-capstone-nodes to communicate with control plane (kubelet and workload TCP ports)",
         "FromPort": 1025,
         "GroupId": {
           "Ref": "SG"
         },
         "IpProtocol": "tcp",
         "SourceSecurityGroupId": {
-          "Fn::ImportValue": "eksctl-capstone-cluster-eks-cluster::SecurityGroup"
+          "Fn::ImportValue": "eksctl-udacity-capstone-cluster::SecurityGroup"
         },
         "ToPort": 65535
       }
@@ -69,14 +69,14 @@
     "IngressInterClusterAPI": {
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
-        "Description": "Allow worker nodes in group capstone-workers-eks to communicate with control plane (workloads using HTTPS port, commonly used with extension API servers)",
+        "Description": "Allow worker nodes in group udacity-capstone-nodes to communicate with control plane (workloads using HTTPS port, commonly used with extension API servers)",
         "FromPort": 443,
         "GroupId": {
           "Ref": "SG"
         },
         "IpProtocol": "tcp",
         "SourceSecurityGroupId": {
-          "Fn::ImportValue": "eksctl-capstone-cluster-eks-cluster::SecurityGroup"
+          "Fn::ImportValue": "eksctl-udacity-capstone-cluster::SecurityGroup"
         },
         "ToPort": 443
       }
@@ -84,10 +84,10 @@
     "IngressInterClusterCP": {
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
-        "Description": "Allow control plane to receive API requests from worker nodes in group capstone-workers-eks",
+        "Description": "Allow control plane to receive API requests from worker nodes in group udacity-capstone-nodes",
         "FromPort": 443,
         "GroupId": {
-          "Fn::ImportValue": "eksctl-capstone-cluster-eks-cluster::SecurityGroup"
+          "Fn::ImportValue": "eksctl-udacity-capstone-cluster::SecurityGroup"
         },
         "IpProtocol": "tcp",
         "SourceSecurityGroupId": {
@@ -99,7 +99,7 @@
     "NodeGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
-        "DesiredCapacity": "2",
+        "DesiredCapacity": "3",
         "LaunchTemplate": {
           "LaunchTemplateName": {
             "Fn::Sub": "${AWS::StackName}"
@@ -117,10 +117,10 @@
           {
             "Key": "Name",
             "PropagateAtLaunch": "true",
-            "Value": "capstone-cluster-eks-capstone-workers-eks-Node"
+            "Value": "udacity-capstone-udacity-capstone-nodes-Node"
           },
           {
-            "Key": "kubernetes.io/cluster/capstone-cluster-eks",
+            "Key": "kubernetes.io/cluster/udacity-capstone",
             "PropagateAtLaunch": "true",
             "Value": "owned"
           }
@@ -129,7 +129,7 @@
           "Fn::Split": [
             ",",
             {
-              "Fn::ImportValue": "eksctl-capstone-cluster-eks-cluster::SubnetsPublic"
+              "Fn::ImportValue": "eksctl-udacity-capstone-cluster::SubnetsPublic"
             }
           ]
         }
@@ -174,7 +174,7 @@
               "DeviceIndex": 0,
               "Groups": [
                 {
-                  "Fn::ImportValue": "eksctl-capstone-cluster-eks-cluster::SharedNodeSecurityGroup"
+                  "Fn::ImportValue": "eksctl-udacity-capstone-cluster::SharedNodeSecurityGroup"
                 },
                 {
                   "Ref": "SG"
@@ -182,7 +182,7 @@
               ]
             }
           ],
-          "UserData": "H4sIAAAAAAAA/6w7+3PiOJO/56/QZae+2q1ZA35AAt/m6gyYhAQIAUIee3spIQvj4FdkGUjmcn/7lWxDbEmZb2bv2KpNWe5u9btbVs8vyAsTW0FhsHSdowiiNXRw3AJB4nlHJAmQb7eOFKCA6gaSqucuqilCNUbEjWhcjTBR3CCmMEC4ughDGlMCowr0tEq8OtoSl+KnpevhmFFBYUBxQFvgv48AAOAXgNcxop4SRxi5SxeB+DWm2LeBTcJIcQOQBC4Fy5CAdbLAHqa/pw+mD9/CAAzcINkBDfxqDrTfjlKKf04x2bgI/5XTH4QIesDHFNqQQhBBAn1MMYlbYGKd969HvwPzbvrUtXrm7WD2lK2luFawcUkY+DigPdfDZ1VMUTVjt7qnV8HBJt/o3AsX0AMwsEFMIXVRaa/O4HY6syZP3dH0dzC67lpPA7NtDfYPM7M/mk3/5ba5Dgq7ZuIFYaBINk1J98e/g/5oOjNHHeup3/3hPTxGOd0pQ9lhNKWQ0DPusZrEpLpwgz0i+M8UAABFCUIbK2509uVbzsk7/9KDC+zFe4BMJe+/Qy9awUrGT8UNq3vvUlz77Mu3gjBFej7cKVFoM2JD8/5pfN2dFl8T7LgxxSTd94ySBBcXty5dKRS6AT0wk5mkSCKLk4iEG9fG5Axu4+LLMGD4mCgkCajr4zM7RGtMihJjug3JWom8xHGDMxS4RfzAVRZuoNguOauGEa2iwGVq5UBYlGYwzGQMJsC0YhegotBW3GBJYIEl14cOPvvyjXm6dTV9sjqTJ7PTub4dzd4r9ppUMCKV7HU5EN7z1ak1mfc71vSpez00+6N35izVCCYxbukVVcHreJG4nl1RC4wwf8iSiuBf2XLlFfpeWYUyYOaMDPIIgHAbYNICJAxpi/3vCIAI0lULpDh56sj/HnDjLCFU7KpaY5wij6bJiW3HCGDiu3HshkHcAse1hmEci3lKYb+2dd4fgY41mfV7/Y45s9LV9P2w3++8djsdc9FxzG2/bTr9ttk1R21n/bJau+fNba1t3sQ9s2vOh5Ph1rp56M5vbrrWNiL23aWXEkF+3bPP52/DtnHfnfW3w5n5Onqz6sMuUkfz8L47G2Zrs8PatjezZsO2dW6qt1ZKxNwNr6A+dx/vL5PH+4mH3jodc9rfdm8eLq/Cx/5qg0bmjdVu35hdx7HGJuP6Juw4jtU2B0Y9JWL4FHXxFX6B0/ozvHwbjOerry/q5oreNu+27d3m3sP3yct203jbXkaDUe/leXgSLda3L8v2edQbpETUqH1xis4nw/X9m/noX45Ox54doc2D17s5vdd6fevk/hJdjsnqte8Gc/vCqz0SL1Zv7gevN9P7XkqkiYL5zeNNR19eNnf+q1/t9Ux6faetQ212XR+vZv3ZA4nMLXo9IS+Du40RDzTPOhm8nfbrz7cPq4wTJ74K+4NkTceN5+frybxpm/75ze18or+MOs+vI7Oq3j6P39xb6/5xs6WjoBFAX52O7xKre9XepUQu++tmDepJe1Q7H3fd9vjtpfkyHHTcm8tt4lm3m0d19FVtR7SZIF2/aAzmcBWeo8ed8WZ8bUZZ4q0+37wsFv7WryUnnWln+ppYHXNrmSYcPg871rbrPHTnk9rYvLmots2brulcrYfmKTOvbW2tdkZke9MbmsO2uTzlzTrIzdo2rbETd3qj80a4a1x6Rme8ee1P0HXYuMUpEd+50+BJeIGCu6vr/tRv91bdhRc68aNW3UZXNzs0eI0ubRh8PXVuH++rRnK1uXjZ4rAWPoyd+X1K5Ks1f64bceLGQ2OzfGhMr9TOdoqvJk7Qs9onMdKN/vz8ca6fDCaos1lePLc1o+n75vh2frceZDq5s+nia8eIdrvG2xpvLtfh3dv1aDCf6tadrTmrGbmlS7S6Om1f9mt30fTEeruqbTtfq9ePdrAZP6ZE7k1z+bzbDHeollxRdz2eXM239kVjMTTUePLYvl2R6fM97c/uYL1XtXoTI7nS0ddd7+WFxL1VM1Os3lnEfjh4OP/aqz1cvC0e3Lv2ybPbXofodWzP1u3N8zVpXE4mi3h5bjlkFF2+Vs+tpm6efaQJa9SVJYnv56483yFYQYT+aFaCkTvHhAG1wEbNcoiXxGnxz/jZP7fyJAsAwoSyRgtSrMCErkLi0tdPmMh+LH8yzleURnGrWm22m6ahnei9Tu203VAbbdPsdc2moWm9zmlTbVQcclLBibLFMVVUVsYrMG3X4DauoNDPCQfQxy2AYBTTMMBKzihL0GXkrAfIhGPi7+iHcNlzQbhc2p8jy35JzNDykvEfP4meifK3kFFCCA6oshfl71FZu4HdAp2sg2cLEcFLTHCAWCP/7f1oL+JBdf8HlnNlHVSHdxh9PJW9EnkuDmiFORoOKPM6Nwwq69OYtXUbNW301CIuceIiLYWdD0rPDqYKDdc4KK0qB86ZYKVXMtk4XNYGhmWCB+ELqyj0fcgUDbdFCjjYlFnOdJu2TbNp3kiZgydr1B1fH9r8/W8DvQS3QMYC/NdNjryL+tGM4Tecio9tN/HB6X7BrqjazoPEwUDTjXSV1INKvpJlRmo4lT1QPces2xXNyNdO9JPMneuVMpSjxxUeD0p2TFfFHYKKwQFGOg9GGBi3BtWymEjAQnUosu9oPNgqViunAq92UFEbHG7GBk+RMP2WVIl07plJzq1INMvULWqNUS8JSmS4KROC/IJqfUNcqosWYD4kcBJpnJmpWvFdREKQvadaLqOedZg7FR8I7+0osWyFHbS9oo4FdoiERSJjkep7Vakn+QLkVphT8NZGoo4NAYgxJuhXPeVtePBKVduLXLI8qUv9iotFrRL70POAqh5UecDaMwRVnp+GIwQip11mbNF36lBMBaX9U3flhZfZSYzwNGY4VEPiqcIKl558TeK5kriF0iTGOa7hlF2VuUkAg70ns80Fy9oyBnjRfMEEkVGIVq1paHv/4rwCyhIC80tByYL2iMDGmyrIzJZ4D7KFXOgbop8x5UhSL3OrQwDVbc7RHF3U1kfwq+oH52I0SOsVEgkiPmxcHQcVXVJhRF3zjsNcouAB7LFMZ6lKzc/HtmAaaSVsOGIOqkOJgFDMOXalyYE5uqjEVBW8cblU5Ne5Z8GzfJGBSJdkRr4w6EIUsgzGhzizs6BkvjhL1K4JfuRLlMeMIWY6O5BpXuZvkoLq8xk30sVwIWJWIpKakyjqKV2oXNggCdNIlgXcYHlgRj/Ebg5T25tXcEZ+peEIlKkuuJyY1W2+F3A0WQ8lrqXNabne870RkXk9FC2UubhoYplEpWxPZH0hqvMdmmAawalTDkS+mGl4r/Ble/qCQZBkRex9Uo8Q1S0LAU6zYi6UqBAKUegKhYKFeNYifDBe1l9DOE44RiH6PuJbzF2iLxGRGuHPOa6Q3qBImx4c1zg4RzHv67DsK6xs6hJbyhxbon7JsUvwIiI2KKmhxO72wwo58yvx5OLykUmE5pYVt3JTnCiNj1ykGieHUiM2mIJGfT5fZKc/ASyt6tLVcu+pc62nIZ6cJFoV44F5ZDmCbdGv0ggWYpVXoS/pdX2xr400sRogmRMiuYaEJoqJJSLzJ4yUWhmRnYMKJzMiVto0FvmzAZSKKeNU4p3kE8N8do4WszQsMY1kTVLD4WOcLx5im0hkxQOJbQwSHNkQPVtIMdz+kS79RCDZTaZtJA2S1FYfR4gP95Mca4oaTPEO1A4yiB0Q4SUnsgJDNf5wrRVTJ8uUXNVghfCgC11TP2jzgieKZki6ISE7+EKH7cuOEInSlOWzQGidEV9EEPokSUjO0RwjsuTIlMLJJH6BQXWRLwl9tVRwiSH/jiDRoOD8qWNovEPJ6EnOJESsOSuhYfAlfawvLWquGLCu0IFKiqsrO45LAt2XuTKRxhkzVkknUDx8IOlB3RHj25UcypDsm1XqXeUcJnxEYJwdEAsdq+Qb6yfWluld1s0KFU1ylpGojsiyGRGdmAj9PxX42KmSMsqfvFxR4z5fHFjCKqRDdgTVhQLFI0FV7GO5TxvGR+Xff3gICidXvdAGyc5EfKsnq6VZz1bclXFf3jRRVE2e5SQ5oLzk6nw+0/nPlnztI7K6Ie0HjYpakwAKBVD8xOrLv4JJv7ozfZwKGVJsFfnPeEj4WLYs+JveLPQMvGQ7VfQfXzyY+LJP8bw60SfeISrZF83ni/0c4cvKD10x+XD3FIV2XPFh9AP3S9kgjDhCdFa+StuPIO0H4kbm0Dr79I7uMLCU352d/b9eQkvGoc4aNc2oqaqhG3XthzVVngb8MU0VJt7O+IG34mWmVDnCiFwQ2tghYRJxONuQrDGJDwotjLad/cxd48fU4Y9NJtg2wXHcArVK+l+2WLgY3tPM7zAPN8ILTPML4fKd8f6GFQZh8OqHSeGWGAdw4WG7BZbQi/d3v1u8WIXhujAaANEKz2aDFtD8WiwiU5LscXf1WrM4U+DigHbMnuvhT+ck8kmKtxKvfmjjFrjLOPkuX2aOju2Uw3qRwxTgNoBlED2HQKnRu8RNRzSyp2X+KnOX7mi6v/RXaxW1xuyh1koQoQ/d9LI+fcwmP7PshyFNCD6HFB8UPgkppPgqs980nQ3pfMyUFBSZDSXkgNlsQkJSBWWvkwWe4HS4xN7TRlHSAo3afkQERyvsYwI9JaYhgQ5uAfXc3WsX+yF5bQGt2Rxma9mgymwwbe+HkA/c/JSf/8yF+i//ls6+LmC8OsqZoEAJASYE71xaXIrcCC+h6xXXgjAJYkwz1GUSIKYe4GD6tM++v/4Gvu19Z+V6GBAMbbCfiH2irxEGDO6fwP6YZnGXAPz5Jzj+8q0E+H4Mzs7Yqvp+DP76C/zjHzkUI8Be/g/4rz9rSvOvr1/Y638CFoEHogBgtApBDl1YJpgm5ANuubeQHQYY/PG9mgLAeyb6L+A2xqA/7E43GqAh08BhZjsFmF1fWaOz4y+/ooR4QFFi18MBBco9GN/OgHIBju8VuI0VjDRlj5jNiSiUekqMURjYMXOu2nE6ydSqVtVGs6LV2VEp/Vv1mJvTKozcaor527HELDntglk4jr7DSgt8SeU4BsffZ4GhKQyv+kU9Luopn6NmiihyA9KQVdxoY+RMF4akBeDCODUPPXsYW5/DMx/KMSRDwQJePngbV+00wfx2fJSHSJgQhD8rMeAXQFduDBAMQLjBhLg2BvuJ7qMyu4N+z+o8dAbf4dlzl1hBr8jbc16su8fc4Hk2k+4ucYpQnDU/7PS+lwJBCv5dKsRhch788Yd13SsZ7mMUXjBTebJdYpcCAHt+/9QQ8pntFHyvyMKUfEvJdZfHJksI5Y2Of3sXVFfWXPqayZoZOB3ARtQDNsR+GCgEeyG0uXdZ6d13AtzLmEJCC+8+T+B/5x+lCMn9pF4/PvrfAAAA///hLCrOCTMAAA=="
+          "UserData": "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"
         },
         "LaunchTemplateName": {
           "Fn::Sub": "${AWS::StackName}"
@@ -252,10 +252,10 @@
     "SG": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "Communication between the control plane and worker nodes in group capstone-workers-eks",
+        "GroupDescription": "Communication between the control plane and worker nodes in group udacity-capstone-nodes",
         "Tags": [
           {
-            "Key": "kubernetes.io/cluster/capstone-cluster-eks",
+            "Key": "kubernetes.io/cluster/udacity-capstone",
             "Value": "owned"
           },
           {
@@ -266,7 +266,7 @@
           }
         ],
         "VpcId": {
-          "Fn::ImportValue": "eksctl-capstone-cluster-eks-cluster::VPC"
+          "Fn::ImportValue": "eksctl-udacity-capstone-cluster::VPC"
         }
       }
     }
